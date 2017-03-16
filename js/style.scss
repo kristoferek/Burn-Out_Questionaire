@@ -36,26 +36,120 @@ $contentHeight: calc(0.72 * 100vh);
     }
 }
 
+
 .questionaire{
     min-height: $contentHeight;
     color: white;
     .top-content, .main-content{
-        min-height: 100px;
+        // min-height: 100px;
     }
     .top-content .description{
         padding: 15px;
     }
-    .top-content .title, .top-content .description, .main-content .poll{
+    .top-content .title, .top-content .description, .main-content .poll, .question, .buttons, .results{
         margin-bottom:  20px;
     }
+    .question{
+        border: 1px dotted white;
+        border-radius: 10px;
+        padding: 15px;
+        height: 100%;
+        &:hover{
+            background-color: rgba(20, 70, 59, 0.21);
+        }
+
+        .text{
+            font-size: 1.2em;
+        }
+
+
+        /* .slideThree */
+        $activeColor: #e42916; //red
+        /* $activeColor: #27ae60; //green */
+        // $darkenColor: darken($activeColor, 20%);
+        // $background: #3498db;
+        .slideThree {
+          width: 80px;
+          height: 26px;
+          background: #333;
+          margin: 10px 20px 0 auto;
+          position: relative;
+          border-radius: 50px;
+          box-shadow: inset 0px 1px 1px rgba(0,0,0,0.5), 0px 1px 0px rgba(255,255,255,0.2);
+          &:after {
+            content: 'NO';
+            color: #0fab1a;
+            position: absolute;
+            right: 10px;
+            z-index: 0;
+            font: 12px/26px Arial, sans-serif;
+            font-weight: bold;
+            text-shadow: 1px 1px 0px rgba(255,255,255,.15);
+          }
+          &:before {
+            content: 'YES';
+            color: $activeColor;
+            position: absolute;
+            left: 10px;
+            z-index: 0;
+            font: 12px/26px Arial, sans-serif;
+            font-weight: bold;
+          }
+          label {
+            display: block;
+            width: 34px;
+            height: 20px;
+            cursor: pointer;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            z-index: 1;
+            background: #fcfff4;
+            background: linear-gradient(top, #fcfff4 0%, #dfe5d7 40%, #b3bead 100%);
+            border-radius: 50px;
+            transition: all 0.4s ease;
+            box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.3);
+          }
+          input[type=checkbox] {
+            visibility: hidden;
+            &:checked + label {
+              left: 43px;
+            }
+          }
+        }
+        /* end .slideThree */
+    }
+}
+
+.results{
+    .visual{
+        padding-top: 15px;
+        // min-height: 50px;
+        &:hover{
+            background-color: rgba(20, 70, 59, 0.21);
+        }
+        &:active{
+            background-color: rgba(20, 70, 59, 0.10);
+        }
+    }
+    .border{
+        border: 1px dotted white;
+        border-radius: 10px;
+        padding: 15px;
+    }
+
 }
 
 .footer{
     height: $footerHeight;
     padding: 12px 0 24px 0;
     a:link{
+        color: rgba(44,189,167,1);
         padding-top: 4px;
-        color: white;
-        border-top: 1px dotted white;
+        border-top: 1px dotted rgba(44,189,167,1);
+    }
+    a:hover{
+        color: rgba(129, 233, 218, 1);
+        text-decoration: none;
     }
 }

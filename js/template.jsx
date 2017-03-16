@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import {Questionaire} from './questionaire.jsx';
 
 import './style.scss';
-
+// Display header
 class Header extends React.Component{
     render(){
         return <div className="raw header">
@@ -15,11 +15,11 @@ class Header extends React.Component{
         </div>
     }
 }
-
+// Display footer
 class Footer extends React.Component{
     render(){
         return <div className="raw footer">
-            <div className="col-xs-12 col-sm-12">
+            <div className="col-xs-12 col-sm-12 text-right">
                 <a href="mailto:Krzysztof.Michal.Nowak@gmail.com">
                     &copy; Krzysztof Michał Nowak
                 </a>
@@ -27,7 +27,7 @@ class Footer extends React.Component{
         </div>
     }
 }
-
+// Comopose page
 export class Template extends React.Component{
     constructor(props) {
         super(props)

@@ -1,0 +1,61 @@
+@import '../node_modules/bootstrap-sass/assets/stylesheets/bootstrap-custom';
+body{
+    background-color: rgba(44,189,167,1);
+    background: filter-gradient(#2cbda7, #0a5248, vertical);
+    background: linear-gradient(rgba(44,189,167,1) 0%, rgba(10,82,72,1) 100%);
+    color: white;
+    font-size: 17px;
+}
+
+$headerHeight: calc(0.2 * 100vh); // ref 150
+$headerH1Height: calc(4 / 5 * 0.2 * 100vh); // ref 120
+$headerH1Padding: calc(1 / 5 * 0.2 * 100vh); // ref 30
+$footerHeight: calc(0.08 * 100vh);
+$contentHeight: calc(0.72 * 100vh);
+
+// .container{
+//     position: relative;
+// }
+
+.header {
+    margin-top: 0;
+    height: auto;
+    min-height: $headerHeight;
+    background-size: cover;
+
+    h1{
+        border: 1px dotted white;
+        border-radius: 10px;
+        height: auto;
+        padding: $headerH1Padding 0;
+        margin-bottom:  20px;
+        font-weight: 700;
+        @media (max-width: $screen-xs-max)  {
+            font-size: calc(0.08 * 100vw);
+        };
+    }
+}
+
+.questionaire{
+    min-height: $contentHeight;
+    color: white;
+    .top-content, .main-content{
+        min-height: 100px;
+    }
+    .top-content .description{
+        padding: 15px;
+    }
+    .top-content .title, .top-content .description, .main-content .poll{
+        margin-bottom:  20px;
+    }
+}
+
+.footer{
+    height: $footerHeight;
+    padding: 12px 0 24px 0;
+    a:link{
+        padding-top: 4px;
+        color: white;
+        border-top: 1px dotted white;
+    }
+}

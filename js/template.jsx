@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom';
 import {Questionaire} from './questionaire.jsx';
 
 import './style.scss';
-// Display header
+
+// Component header static
 class Header extends React.Component{
     render(){
         return <div className="raw header">
@@ -15,7 +16,8 @@ class Header extends React.Component{
         </div>
     }
 }
-// Display footer
+
+// Component footer static
 class Footer extends React.Component{
     render(){
         return <div className="raw footer">
@@ -27,6 +29,7 @@ class Footer extends React.Component{
         </div>
     }
 }
+
 // Comopose page
 export class Template extends React.Component{
     constructor(props) {

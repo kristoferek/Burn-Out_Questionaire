@@ -24,7 +24,7 @@ $contentHeight: calc(0.72 * 100vh);
     background-size: cover;
 
     h1{
-        border: 1px dotted white;
+        border: 2px dotted white;
         border-radius: 10px;
         height: auto;
         padding: $headerH1Padding 0;
@@ -152,4 +152,10 @@ $contentHeight: calc(0.72 * 100vh);
         color: rgba(129, 233, 218, 1);
         text-decoration: none;
     }
+}
+
+.alert{
+    color: #ff8a8a;
+    font-family: courier;
+    text-shadow: 0 0 2px #000000 ;
 }

@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './style.scss';
-import './jspdf.debug.js';
 import {questions, results} from './questions.js';
 
 // Display questions or result
@@ -10,15 +9,19 @@ class MainContent extends React.Component{
         super(props);
         console.log('Questionaire constructor');
         this.state={
-            displayResult: false,
-            physicalScore: 0,
-            mentalScore: 0,
-            emotionalScore: 0,
-            questionArr:[],
-            barClicked: false,
-            buttonText: 'Proceed',
-            DownloadText: 'Download PDF',
-            resultDescription: ""
+            displayResult: false, // displays questions or result
+            physicalScore: 0, // count checked questions of physical type
+            mentalScore: 0, // count checked questions of mental type
+            emotionalScore: 0, // count checked questions of emotional type
+            questionArr:[], // questions
+            barClicked: false, //
+            buttonText: 'Proceed', // submit button text
+            DownloadText: 'Download PDF', // Download Text
+            resultDescription: "", // desription under progressbars
+            inputDisplay: false, // input display state
+            inputName: "", // name to put in pdf
+            inputAlertDisplay: false, // input alert state
+            inputAlertMsg: " Type in your name (min 3 characters)"
         }
     }
     // Initialise and structurise data by getting them from questions.js an putting to this.state.questionArr
@@ -55,27 +58,30 @@ class MainContent extends React.Component{
         console.log(arr);
     }
 
-
+    // Initialise description beteath progress bars this.state.resultDescription
     initialiseDescription = ()=>{
         this.setState({
-            resultDescription: <div className="col-xs-12">
+            resultDescription: <div className="">
+                <div className="col-xs-12 col-sm-6 col-md-8">
                     <p>
-                        Burnout is a reaction to stress, which becomes obvious in emotional, mental and physical exhaustion.
+                        Burnout is a reaction to stress, which becomes obvious in emotional, mental and physical exhaustion. Burnout affects productivity and energy levels, leaving those affected increasingly helpless, hopeless, cynical, and resentful. Most people have days when we feel bored, overloaded, or unappreciated. If you feel like this most of the time, however, you may be experiencing burnout.
                     </p>
-                    <div className="alert alert-danger descripton" role="alert">
-                        Click the bars above to see description and some advices.
-                    </div>
                 </div>
-            });
+                <div className="col-xs-12 col-sm-6 col-md-4 border">
+                    <i className="fa fa-arrow-up fa-3x fa-pull-left" aria-hidden="true"></i>
+                    Click the bars above to see description and some advices.
+                </div>
+            </div>
+        });
     }
 
-    // Data initialisation
+    // Data initialisation - this.state.questionArr, this.state.resultDescription
     componentWillMount() {
         this.makeQuestionArray(questions);
         this.initialiseDescription();
     }
 
-    // Display title and description of questionaire
+    // Returns page title and title description for questionaire and for results
     topContent  = () => {
         return <div className="raw top-content">
             <div className="col-xs-12 col-sm-5 title">
@@ -92,7 +98,7 @@ class MainContent extends React.Component{
         </div>
     }
 
-    // When checkbox is slicked function updates physicalScore, mentalScore and emotionalScore
+    // When checkbox is clicked function updates physicalScore, mentalScore and emotionalScore
     updateScore = (index, isChecked)=> {
         switch (this.state.questionArr[index].type) {
             case 'physical':
@@ -120,25 +126,24 @@ class MainContent extends React.Component{
         }
     }
 
-    // Handle checkbox state change
+    // Handle checkbox - on change update this.state.scores and this.state.questionArr
     handleCheckbox = (event, el, index) => {
         // Make copy this.state.questionArr
         let copyArr = this.state.questionArr;
 
-        // Change checked key value to oposite
+        // Change checked question key value to oposite
         copyArr[index].checked = !el.checked;
 
-        // Update scores
+        // Update apropriate scores with checked question index
         this.updateScore(index, this.state.questionArr[index].checked);
 
-        // Update this.state.questionArr
+        // Update question array this.state.questionArr
         this.setState({
             questionArr: copyArr
         })
-        // console.log(this.state.questionArr[index]);
     }
 
-    // Generates fields with question and checkbox
+    // Generates and returns fields with questions from this.state.questionArr and checkboxes
     generateLi = (el, index) =>{
         return <div key={index}  className="col-xs-12 col-sm-6">
             <div className="raw">
@@ -146,30 +151,29 @@ class MainContent extends React.Component{
                     <div className = "text">
                         {el.question}
                     </div>
-                    <div className="">
-                        <section title=".slideThree">
-                            <div className="slideThree">
-                                <input type="checkbox" value="None" id={`slideThree${index}`} name="check" checked={el.checked} onChange={
-                                    ()=>this.handleCheckbox(event, el, index)
-                                } />
-                            <label htmlFor={`slideThree${index}`}></label>
-                            </div>
-                        </section>
+                    <div className="slideThree">
+                        <input type="checkbox" value="None" id={`slideThree${index}`} name="check" checked={el.checked} onChange={
+                            ()=>this.handleCheckbox(event, el, index)
+                        } />
+                        <label htmlFor={`slideThree${index}`}></label>
                     </div>
                 </div>
             </div>
         </div>
     }
 
-    // Handles Proceed button - display results or go back to questions
+    // Handles Proceed button state and text
     handleProceed=()=>{
         this.setState({
             buttonText: this.state.displayResult ? "Proceed" : "Go back",
             displayResult: !this.state.displayResult,
+            inputDisplay: false,
+            inputAlertDisplay: false
         })
         this.initialiseDescription();
     }
 
+    // returns class setting appriopriate color for generated progress bar depending on given score (val)
     progressBarrClass = (val) =>{
         if (val < 2) {
             return "progress-bar progress-bar-success"
@@ -180,37 +184,59 @@ class MainContent extends React.Component{
         }
     }
 
-    generateDescription = (val, type)=>{
+    setStateResultDescription = (val, type, title, desc) =>{
+        this.setState({
+            barClicked: true,
+            resultDescription: <div className="col-xs-12 border">
+                <h3>
+                    <strong>
+                        <span  className="text-capitalize">
+                            {`${type} `}
+                        </span>
+                        {`exhaustion ${val*20}%`}
+                    </strong>
+                    {` - ${title}`}
+                </h3>
+                <div className="description">
+                    {desc}
+                </div>
+            </div>
+        })
+    }
+
+    // Depending on score (val) updates this.state.resultDescription with customised header containing state (type), exhaustion level (val*20%), title and description
+    updateStateResultDescription = (val, type)=>{
         if (val < 2) {
-            this.setState({
-                barClicked: true,
-                resultDescription: <div className="col-xs-12 border">
-                        <h3><strong>{`${type} exhaustion ${val*20}%`}</strong>{` - ${results.moderate.title}`}</h3>
-                        <div className="description">{results.moderate.description}</div>
-                    </div>
-            })
+            this.setStateResultDescription(val, type, results.moderate.title, results.moderate.description);
         } else if (val < 3) {
-            this.setState({
-                barClicked: true,
-                resultDescription: <div className="col-xs-12 border">
-                        <h3><strong>{`${type} exhaustion ${val*20}%`}</strong>{` - ${results.average.title}`}</h3>
-                        <div className="description">{results.average.description}</div>
-                    </div>
-            })
+            this.setStateResultDescription(val, type, results.average.title, results.average.description);
         } else {
-            this.setState({
-                barClicked: true,
-                resultDescription: <div className="col-xs-12 border">
-                        <h3><strong>{`${type} exhaustion ${val*20}%`}</strong>{` - ${results.critical.title}`}</h3>
-                        <div className="description">{results.critical.description}</div>
-                    </div>
-            })
+            this.setStateResultDescription(val, type, results.critical.title, results.critical.description);
         }
     }
 
+    // Return single progress bar with label
+    generateSingleProgressBar = (score, label) => {
+        return <div className="raw">
+            <div className="col-xs-12 col-sm-3">
+                <strong className="text-uppercase">{label}</strong><br/>
+            </div>
+            <div className="col-xs-12 col-sm-9 visual" onClick={()=>this.updateStateResultDescription(score, label)}>
+
+                <div className="progress">
+                    <div className={this.progressBarrClass(score)} role="progressbar" aria-valuenow={score} aria-valuemin="0" aria-valuemax="5" style={{width: `${score*20}%`}}>
+                        <span>
+                            {score*20}%
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    // Return labels(hidden on small devices) and progress bars
     generateProgressBars = ()=>{
         return <section>
-
             <div className="raw">
                 <div className="col-xs-12 col-sm-3 hidden-xs">
                     <em className="">State</em>
@@ -219,54 +245,13 @@ class MainContent extends React.Component{
                     <em className="">Condition</em>
                 </div>
             </div>
-
-            <div className="raw">
-                <div className="col-xs-12 col-sm-3">
-                    <strong className="text-uppercase">physical</strong><br/>
-                </div>
-                <div className="col-xs-12 col-sm-9 visual" onClick={()=>this.generateDescription(this.state.physicalScore, 'Physical')}>
-
-                    <div className="progress">
-                        <div className={this.progressBarrClass(this.state.physicalScore)} role="progressbar" aria-valuenow={this.state.physicalScore} aria-valuemin="0" aria-valuemax="5" style={{width: `${this.state.physicalScore*20}%`}}>
-                            <span>
-                                {this.state.physicalScore*20}%
-                            </span>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div className="raw">
-                <div className="col-xs-12 col-sm-3">
-                    <strong className="text-uppercase">mental</strong><br/>
-                </div>
-                <div className="col-xs-12 col-sm-9 visual" onClick={()=>this.generateDescription(this.state.mentalScore, 'Mental')}>
-
-                    <div className="progress">
-                        <div className={this.progressBarrClass(this.state.mentalScore)} role="progressbar" aria-valuenow={this.state.mentalScore} aria-valuemin="0" aria-valuemax="100" style={{width: `${this.state.mentalScore*20}%`}}>
-                            <span>{this.state.mentalScore*20}%</span>
-                          </div>
-                    </div>
-
-                </div>
-            </div>
-            <div className="raw ">
-                <div className="col-xs-12 col-sm-3">
-                    <strong className="text-uppercase">emotional</strong><br/>
-                </div>
-                <div className="col-xs-12 col-sm-9 visual" onClick={()=>this.generateDescription(this.state.emotionalScore, 'Emotional')}>
-
-                    <div className="progress">
-                        <div className={this.progressBarrClass(this.state.emotionalScore)} role="progressbar" aria-valuenow={this.state.emotionalScore} aria-valuemin="0" aria-valuemax="5" style={{width: `${this.state.emotionalScore*20}%`}}>
-                            <span>{this.state.emotionalScore*20}%</span>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+            {this.generateSingleProgressBar(this.state.physicalScore, 'physical')}
+            {this.generateSingleProgressBar(this.state.mentalScore, 'mental')}
+            {this.generateSingleProgressBar(this.state.emotionalScore, 'emotional')}
         </section>
     }
 
+    // Return progress brass with description beneath
     generateResult = () =>{
         // {this.generateDescription(this.state.barClicked, "")}
         return <div className="col-xs-12 results">
@@ -275,76 +260,142 @@ class MainContent extends React.Component{
         </div>
     }
 
+    // Handle input with user name
+    handleInput = (event) => {
+        this.setState({
+            inputName: event.target.value
+        })
+    }
+
+    // Tun on input display state
+    getName = () => {
+        this.setState({
+            inputDisplay: true
+        })
+    }
+
+    // Validate input name - min 3 characters
     handlePDF = () => {
+        if (this.state.inputDisplay) {
+            if (this.state.inputName.length < 3){
+                this.setState({
+                    inputAlertDisplay: true,
+                 })
+            } else {
+                this.setState({
+                    inputAlertDisplay: false,
+                    inputDisplay: false
+                 });
+                this.generatePDF();
+            }
+        } else {
+            this.getName();
+        }
+    }
+
+    // Generates result score in PDF
+    generatePDF = () => {
         const doc = new jsPDF();
 
-        const test = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus id eros turpis. Vivamus tempor urna vitae sapien mollis molestie. Vestibulum in lectus non enim bibendum laoreet at at libero. Etiam malesuada erat sed sem blandit in varius orci porttitor. Sed at sapien urna. Fusce augue ipsum, molestie et adipiscing at, varius quis enim. Morbi sed magna est, vel vestibulum urna. Sed tempor ipsum vel mi pretium at elementum urna tempor. Nulla faucibus consectetur felis, elementum venenatis mi mollis gravida. Aliquam mi ante, accumsan eu tempus vitae, viverra quis justo.\n\nProin feugiat augue in augue rhoncus eu cursus tellus laoreet. Pellentesque eu sapien at diam porttitor venenatis nec vitae velit. Donec ultrices volutpat lectus eget vehicula. Nam eu erat mi, in pulvinar eros. Mauris viverra porta orci, et vehicula lectus sagittis id. Nullam at magna vitae nunc fringilla posuere. Duis volutpat malesuada ornare. Nulla in eros metus. Vivamus a posuere libero.';
-
-        const header = "Burnout test";
-        const descriptions = [results.critical.title, results.critical.description, results.average.title, results.average.description, results.moderate.title, results.moderate.description];
-
+        const header = "Burn-out questionaire";
+        const date = new Date();
 
         doc.setFontSize(48);
         doc.setFont("helvetica");
         doc.text(20, 30, header);
 
+        doc.setFontSize(14);
+        doc.setFont("courier");
+        doc.setFontType("bold");
+        doc.text(190, 40, date.toDateString(), null, null, 'right');
+
         doc.setFontSize(18);
         doc.setFont("courier");
         doc.setFontType("bold");
-        doc.text(20, 50, 'Physical exhaustion: ' + (this.state.physicalScore*20) + '%');
-        doc.text(20, 65, 'Mental exhaustion: ' + (this.state.mentalScore*20) + '%');
-        doc.text(20, 80, 'Emotional exhaustion: ' + (this.state.emotionalScore*20) + '%');
+        doc.text(20, 60, "Your name:" + this.state.inputName);
+
+        doc.setFontSize(18);
+        doc.setFont("courier");
+        doc.setFontType("bold");
+        doc.text(20, 90, 'Physical exhaustion: ' + (this.state.physicalScore*20) + '%');
+        doc.text(20, 105, 'Mental exhaustion: ' + (this.state.mentalScore*20) + '%');
+        doc.text(20, 120, 'Emotional exhaustion: ' + (this.state.emotionalScore*20) + '%');
 
         doc.setFontSize(16);
         doc.setFont("helvetica");
         doc.setFontType("bold");
-        doc.text(20, 210, "0 - 20% " + results.moderate.title);
+        doc.text(20, 150, "0 - 20% " + results.moderate.title);
         doc.setFontSize(12);
         doc.setFont("helvetica");
         doc.setFontType("normal");
-        doc.text(20, 225, doc.splitTextToSize(results.moderate.description, 170));
+        doc.text(20, 165, doc.splitTextToSize(results.moderate.description, 170));
 
         doc.setFontSize(16);
         doc.setFont("helvetica");
         doc.setFontType("bold");
-        doc.text(20, 150, "20% - 40% " + results.average.title);
+        doc.text(20, 190, "20% - 40% " + results.average.title);
         doc.setFontSize(12);
         doc.setFont("helvetica");
         doc.setFontType("normal");
-        doc.text(20, 165, doc.splitTextToSize(results.average.description, 170));
+        doc.text(20, 205, doc.splitTextToSize(results.average.description, 170));
 
         doc.setFontSize(16);
         doc.setFont("helvetica");
         doc.setFontType("bold");
-        doc.text(20, 100, "40% - 100% " + results.critical.title);
+        doc.text(20, 250, "40% - 100% " + results.critical.title);
         doc.setFontSize(12);
         doc.setFont("helvetica");
         doc.setFontType("normal");
-        doc.text(20, 115, doc.splitTextToSize(results.critical.description, 170));
+        doc.text(20, 265, doc.splitTextToSize(results.critical.description, 170));
 
         doc.save('burnout.pdf');
     }
 
-    // display questions or results basing on proceed button pressing
+
+    // display questions or results basing on button pressing
     render() {
         return <div className="raw main-content">
             <header>
                 {this.topContent()}
             </header>
             <article>
-                { this.state.displayResult
-                    ? this.generateResult()
-                    : this.state.questionArr.map((el, index) => {
-                        return this.generateLi(el, index)
-                    })
-                }
-                <div className="col-xs-12 buttons">
-                    <button className="btn btn-danger btn-lg" onClick={this.handleProceed}>
-                        {this.state.buttonText}
-                    </button> &nbsp;
-                    <button className={`btn btn-primary btn-lg ${this.state.displayResult ? "" : "disabled"}`} onClick={this.handlePDF}>
-                        {this.state.DownloadText}
-                    </button>
+                <div className="raw">
+                    { this.state.displayResult
+                        ? this.generateResult()
+                        : this.state.questionArr.map((el, index) => {
+                            return this.generateLi(el, index)
+                        })
+                    }
+                </div>
+                <div className="raw">
+                    <div className={this.state.inputDisplay
+                        ? "col-sm-12 col-sm-6 name"
+                        : "col-sm-12 col-sm-6  hidden name"} >
+                        <input type="text" placeholder="type in your name" className="form-control" id="recipient-name" onChange={this.handleInput}/>
+                    </div>
+                    <div className="col-sm-12 col-sm-6 alert">
+                        {this.state.inputAlertDisplay
+                             ? <i className="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                             : null}
+                        {this.state.inputAlertDisplay
+                            ? this.state.inputAlertMsg
+                            : null}
+                    </div>
+                </div>
+                <div className="raw">
+                    <div className="col-xs-12 buttons">
+                        <button className="btn btn-danger btn-lg" type="button" onClick={this.handleProceed}>
+                            {this.state.buttonText}
+                            &nbsp;&nbsp;&nbsp;
+                            <i className="fa fa-bar-chart" aria-hidden="true"></i>
+                        </button>
+                        &nbsp;&nbsp;&nbsp;
+                        <button className={`btn btn-primary btn-lg ${this.state.displayResult ? "" : "disabled"}`} type="button" onClick={this.handlePDF} disabled={!this.state.displayResult}>
+                            {this.state.DownloadText}
+                            &nbsp;&nbsp;&nbsp;
+                            <i className="fa fa-file-pdf-o" aria-hidden="true"/>
+                        </button>
+                    </div>
                 </div>
             </article>
         </div>

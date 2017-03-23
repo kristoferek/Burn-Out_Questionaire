@@ -60,6 +60,10 @@ $contentHeight: calc(0.72 * 100vh);
 
         .text{
             font-size: 1.2em;
+            @media (min-width: $screen-md-min) {
+                width: calc(100% - 125px);
+            }
+
         }
 
 

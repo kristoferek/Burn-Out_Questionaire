@@ -3,19 +3,19 @@ import ReactDOM from 'react-dom';
 import './style.scss';
 import {questions, results} from './questions.js';
 
-// Display questions or result
+// Returns list of questions or result with title and buttons
 class MainContent extends React.Component{
     constructor(props) {
         super(props);
-        console.log('Questionaire constructor');
+        // console.log('Questionaire constructor');
         this.state={
             displayResult: false, // displays questions or result
             physicalScore: 0, // count checked questions of physical type
             mentalScore: 0, // count checked questions of mental type
             emotionalScore: 0, // count checked questions of emotional type
             questionArr:[], // questions
-            barClicked: false, //
             buttonText: 'Proceed', // submit button text
+            buttonIcon: 'bar-chart', // submit button icon
             DownloadText: 'Download PDF', // Download Text
             resultDescription: "", // desription under progressbars
             inputDisplay: false, // input display state
@@ -23,6 +23,18 @@ class MainContent extends React.Component{
             inputAlertDisplay: false, // input alert state
             inputAlertMsg: " Type in your name (min 3 characters)"
         }
+    }
+
+    //  Randomize array element order in-place.
+    // Using Durstenfeld shuffle algorithm.
+    shuffleArray = (array) => {
+        for (var i = array.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+        return array;
     }
     // Initialise and structurise data by getting them from questions.js an putting to this.state.questionArr
     makeQuestionArray = (question)=>{
@@ -53,9 +65,8 @@ class MainContent extends React.Component{
             });
         }
         this.setState({
-            questionArr: arr
+            questionArr: this.shuffleArray(arr)
         })
-        console.log(arr);
     }
 
     // Initialise description beteath progress bars this.state.resultDescription
@@ -75,7 +86,7 @@ class MainContent extends React.Component{
         });
     }
 
-    // Data initialisation - this.state.questionArr, this.state.resultDescription
+    // DATA INITIALISATION - this.state.questionArr, this.state.resultDescription
     componentWillMount() {
         this.makeQuestionArray(questions);
         this.initialiseDescription();
@@ -148,10 +159,10 @@ class MainContent extends React.Component{
         return <div key={index}  className="col-xs-12 col-sm-6">
             <div className="raw">
                 <div className="col-xs-12 col-sm-12 question">
-                    <div className = "text">
+                    <div className = "text pull-left">
                         {el.question}
                     </div>
-                    <div className="slideThree">
+                    <div className="slideThree pull-right">
                         <input type="checkbox" value="None" id={`slideThree${index}`} name="check" checked={el.checked} onChange={
                             ()=>this.handleCheckbox(event, el, index)
                         } />
@@ -166,6 +177,7 @@ class MainContent extends React.Component{
     handleProceed=()=>{
         this.setState({
             buttonText: this.state.displayResult ? "Proceed" : "Go back",
+            buttonIcon: this.state.displayResult ? "bar-chart" : "list",
             displayResult: !this.state.displayResult,
             inputDisplay: false,
             inputAlertDisplay: false
@@ -351,8 +363,43 @@ class MainContent extends React.Component{
         doc.save('burnout.pdf');
     }
 
+    // returns Input field depending on this.state.inputDisplay and alert message
+    generateInputName = ()=>{
+        return <form>
+            <div className={this.state.inputDisplay
+                ? "col-sm-12 col-sm-6 name"
+                : "col-sm-12 col-sm-6  hidden name"} >
+                <input type="text" placeholder="type in your name" className="form-control" id="recipient-name" onChange={this.handleInput}/>
+            </div>
+            <div className="col-sm-12 col-sm-6 alert">
+                {this.state.inputAlertDisplay
+                     ? <i className="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                     : null}
+                {this.state.inputAlertDisplay
+                    ? this.state.inputAlertMsg
+                    : null}
+            </div>
+        </form>
+    }
 
-    // display questions or results basing on button pressing
+    // returns buttons with set text depending on this.state.DownloadText and buttonText
+    generateButtons = () =>{
+        return <div className="col-xs-12 buttons">
+            <button className="btn btn-danger btn-lg" type="button" onClick={this.handleProceed}>
+                {this.state.buttonText}
+                &nbsp;&nbsp;&nbsp;
+                <i className={`fa fa-${this.state.buttonIcon}`} aria-hidden="true"></i>
+            </button>
+            &nbsp;&nbsp;&nbsp;
+            <button className={`btn btn-primary btn-lg ${this.state.displayResult ? "" : "disabled"}`} type="button" onClick={this.handlePDF} disabled={!this.state.displayResult}>
+                {this.state.DownloadText}
+                &nbsp;&nbsp;&nbsp;
+                <i className="fa fa-file-pdf-o" aria-hidden="true"/>
+            </button>
+        </div>
+    }
+
+    // display questions or results basing on button pressed
     render() {
         return <div className="raw main-content">
             <header>
@@ -368,34 +415,10 @@ class MainContent extends React.Component{
                     }
                 </div>
                 <div className="raw">
-                    <div className={this.state.inputDisplay
-                        ? "col-sm-12 col-sm-6 name"
-                        : "col-sm-12 col-sm-6  hidden name"} >
-                        <input type="text" placeholder="type in your name" className="form-control" id="recipient-name" onChange={this.handleInput}/>
-                    </div>
-                    <div className="col-sm-12 col-sm-6 alert">
-                        {this.state.inputAlertDisplay
-                             ? <i className="fa fa-exclamation-triangle" aria-hidden="true"></i>
-                             : null}
-                        {this.state.inputAlertDisplay
-                            ? this.state.inputAlertMsg
-                            : null}
-                    </div>
+                    {this.generateInputName()}
                 </div>
                 <div className="raw">
-                    <div className="col-xs-12 buttons">
-                        <button className="btn btn-danger btn-lg" type="button" onClick={this.handleProceed}>
-                            {this.state.buttonText}
-                            &nbsp;&nbsp;&nbsp;
-                            <i className="fa fa-bar-chart" aria-hidden="true"></i>
-                        </button>
-                        &nbsp;&nbsp;&nbsp;
-                        <button className={`btn btn-primary btn-lg ${this.state.displayResult ? "" : "disabled"}`} type="button" onClick={this.handlePDF} disabled={!this.state.displayResult}>
-                            {this.state.DownloadText}
-                            &nbsp;&nbsp;&nbsp;
-                            <i className="fa fa-file-pdf-o" aria-hidden="true"/>
-                        </button>
-                    </div>
+                    {this.generateButtons()}
                 </div>
             </article>
         </div>
